@@ -1,4 +1,4 @@
-from simple import agent as colorAgent
+from agent import agent as colorAgent
 from llama_index.core.agent import ReActAgent
 from llama_index.llms.openai import OpenAI
 from llama_index.core.tools import QueryEngineTool, ToolMetadata

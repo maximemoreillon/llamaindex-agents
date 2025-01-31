@@ -8,36 +8,40 @@ from llama_index.core.workflow import (
 from dotenv import load_dotenv
 from llama_index.llms.openai import OpenAI
 import asyncio
+from agent import agent as colorAgent
+
 load_dotenv()
 
-class JokeEvent(Event):
-    joke: str
+class ColorEvent(Event):
+    color: str
+    occasion: str
 
 
-class JokeFlow(Workflow):
+class OutfitCololorFlow(Workflow):
     llm = OpenAI()
 
     @step
-    async def generate_joke(self, ev: StartEvent) -> JokeEvent:
-        topic = ev.topic
+    async def recommend_color(self, ev: StartEvent) -> ColorEvent:
+        occasion = ev.occasion
 
-        prompt = f"Write your best joke about {topic}."
-        response = await self.llm.acomplete(prompt)
-        return JokeEvent(joke=str(response))
+        prompt = f"What color should I wear for {occasion}."
+        response = colorAgent.chat(prompt)
+        return ColorEvent(color=str(response), occasion=occasion)
 
     @step
-    async def critique_joke(self, ev: JokeEvent) -> StopEvent:
-        joke = ev.joke
+    async def critique_color(self, ev: ColorEvent) -> StopEvent:
+        color = ev.color
+        occasion = ev.occasion
 
-        prompt = f"Give a thorough analysis and critique of the following joke: {joke}"
+        prompt = f"For the occation of {occasion}, what do you think of wearing an outfit of the color {color}."
         response = await self.llm.acomplete(prompt)
         return StopEvent(result=str(response))
 
 
-w = JokeFlow(timeout=60, verbose=False)
+w = OutfitCololorFlow(timeout=60, verbose=False)
 
 async def main():
-    result = await w.run(topic="bananas")
+    result = await w.run(occasion="my friend's wedding")
     print(str(result))
 
 if __name__ == "__main__":
